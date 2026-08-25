@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Rankoo — world's best-selling software & apps</title>
+<meta name="description" content="Browse and compare the world's best-selling software and apps by category, with rankings, stats and publisher info.">
+<meta name="theme-color" content="#0b0e14">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rankoo">
+<style>
+  :root{
+    --radius:10px;
+    --mono:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  html[data-theme="dark"]{
+    --bg:#0b0e14;--bg-elev:#121722;--bg-input:#0e1219;--text:#e6e9ef;--text-dim:#7d8797;
+    --accent:#5eead4;--accent2:#f0b429;--border:#232936;--bw:1px;
+  }
+  html[data-theme="light"]{
+    --bg:#f5f6f8;--bg-elev:#ffffff;--bg-input:#ffffff;--text:#14171f;--text-dim:#5b6472;
+    --accent:#0f9488;--accent2:#a9670f;--border:#dbe0e6;--bw:1px;
+  }
+  html[data-theme="oled"]{
+    --bg:#000000;--bg-elev:#0a0a0a;--bg-input:#000000;--text:#f5f5f5;--text-dim:#8a8a8a;
+    --accent:#5eead4;--accent2:#f0b429;--border:#1c1c1c;--bw:1px;
+  }
+  html[data-theme="hc"]{
+    --bg:#000000;--bg-elev:#000000;--bg-input:#000000;--text:#ffffff;--text-dim:#ffffff;
+    --accent:#ffff00;--accent2:#00ffff;--border:#ffffff;--bw:2px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--mono);
+    transition:background .2s,color .2s;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;}
+  button,select{touch-action:manipulation;}
+  .wrap{min-height:100vh;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;
+    padding:16px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom))
+    calc(16px + env(safe-area-inset-left));}
+  button,select,.chip,.tbtn,.icon-btn,.theme-btn,.cat-toggle{white-space:normal;word-break:break-word;overflow-wrap:break-word;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 2px 20px;
+    min-width:0;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0;}
+  h1{margin:0;font-size:1.65rem;letter-spacing:.5px;}
+  .tag{margin:2px 0 0;font-size:.85rem;color:var(--text-dim);}
+  .theme-btn{background:var(--bg-elev);color:var(--text);border:var(--bw) solid var(--border);
+    border-radius:var(--radius);padding:10px 14px;font-family:var(--mono);font-size:.9rem;cursor:pointer;
+    min-height:40px;flex-shrink:0;}
+  .theme-btn:hover{border-color:var(--accent);}
+  main{flex:1;}
+  .search{display:flex;align-items:center;gap:8px;background:var(--bg-input);border:var(--bw) solid var(--border);
+    border-radius:var(--radius);padding:12px;margin-bottom:12px;min-width:0;}
+  #query{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-family:var(--mono);
+    font-size:17px;min-width:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .cat-dropdown{position:relative;margin-bottom:18px;}
+  .cat-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--bg-elev);color:var(--text);border:var(--bw) solid var(--border);
+    border-radius:var(--radius);padding:13px 14px;font-family:var(--mono);font-size:.95rem;cursor:pointer;
+    min-height:44px;}
+  .cat-toggle:hover{border-color:var(--accent);}
+  .caret{color:var(--text-dim);transition:transform .15s;}
+  .cat-toggle.open .caret{transform:rotate(180deg);color:var(--accent);}
+  .cat-dropdown .chips{display:none;margin:8px 0 16px;padding:10px;background:var(--bg-elev);
+    border:var(--bw) solid var(--border);border-radius:var(--radius);max-height:280px;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .cat-dropdown .chips.open{display:flex;}
+  .chip{background:var(--bg-elev);color:var(--text-dim);border:var(--bw) solid var(--border);border-radius:999px;
+    padding:9px 14px;font-family:var(--mono);font-size:.85rem;cursor:pointer;min-height:38px;}
+  .chip.active{color:var(--bg);background:var(--accent);border-color:var(--accent);font-weight:700;}
+  .count{font-size:.85rem;color:var(--text-dim);margin:0 2px 12px;}
+  .grid{display:grid;grid-template-columns:1fr;gap:10px;min-width:0;}
+  @media(min-width:560px){.grid{grid-template-columns:repeat(2,1fr);}}
+  .grid>*{min-width:0;}
+  .card{background:var(--bg-elev);border:var(--bw) solid var(--border);border-radius:var(--radius);
+    padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .card .top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .card-head{display:flex;align-items:center;gap:10px;min-width:0;}
+  .avatar{width:42px;height:42px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;
+    justify-content:center;font-weight:700;color:#fff;font-size:.85rem;letter-spacing:.5px;}
+  .card-titles{min-width:0;}
+  .rank{color:var(--accent);font-weight:700;font-size:.9rem;}
+  .cat{font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:var(--bg);
+    background:var(--accent2);border-radius:5px;padding:2px 7px;}
+  .name{font-size:1.25rem;font-weight:700;margin:0;}
+  .pub{font-size:.88rem;color:var(--text-dim);}
+  .stat{display:inline-block;margin-top:6px;font-size:.92rem;font-weight:700;color:var(--accent);
+    background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid var(--accent);
+    border-radius:6px;padding:3px 9px;width:fit-content;}
+  .blurb{font-size:.92rem;color:var(--text);opacity:.9;margin-top:4px;line-height:1.45;}
+  .empty{color:var(--text-dim);font-size:1rem;padding:30px 4px;text-align:center;}
+  .refresh-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    flex-wrap:wrap;margin-bottom:14px;min-width:0;}
+  .refresh-btn{background:var(--bg-elev);color:var(--accent);border-color:var(--accent);}
+  #refreshIcon{display:inline-block;}
+  #refreshIcon.spin{animation:spin .8s linear infinite;}
+  .last-updated{font-size:.8rem;color:var(--text-dim);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px;min-width:0;}
+  .btnrow{display:flex;gap:8px;flex:1 1 auto;min-width:0;}
+  .btnrow .tbtn{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px;}
+  .sortwrap{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--text-dim);min-width:0;}
+  .sortwrap select{background:var(--bg-elev);color:var(--text);border:var(--bw) solid var(--border);
+    border-radius:6px;padding:8px;font-family:var(--mono);font-size:17px;min-height:38px;max-width:100%;}
+  .tbtn{background:var(--bg-elev);color:var(--text-dim);border:var(--bw) solid var(--border);
+    border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:.88rem;cursor:pointer;min-height:38px;}
+  .tbtn:hover{border-color:var(--accent);color:var(--text);}
+  .tbtn.active{color:var(--bg);background:var(--accent);border-color:var(--accent);font-weight:700;}
+  .chipcount{opacity:.65;margin-left:3px;}
+  .card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-width:0;}
+  .icon-btn{background:transparent;border:1px solid var(--border);color:var(--text-dim);border-radius:6px;
+    padding:7px 8px;font-family:var(--mono);font-size:.84rem;cursor:pointer;flex:1 1 calc(50% - 6px);
+    text-align:center;min-height:34px;min-width:0;}
+  .icon-btn:hover{border-color:var(--accent);color:var(--text);}
+  .icon-btn.on{color:var(--accent2);border-color:var(--accent2);font-weight:700;}
+  .icon-btn.cmp-btn.on{color:var(--accent);border-color:var(--accent);}
+  .detail{display:none;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);
+    font-size:.85rem;color:var(--text-dim);line-height:1.5;}
+  .detail.open{display:block;}
+  .compare-bar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;
+    align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;max-width:calc(100vw - 32px);
+    background:var(--bg-elev);border:var(--bw) solid var(--accent);border-radius:999px;padding:8px 16px;
+    margin:14px auto 0;width:fit-content;font-size:.88rem;box-shadow:0 4px 14px rgba(0,0,0,.35);}
+  .compare-view{background:var(--bg-elev);border:var(--bw) solid var(--border);border-radius:var(--radius);
+    padding:16px;margin:14px 0;overflow-x:auto;}
+  .compare-close{float:right;}
+  .compare-table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px;}
+  .compare-table th,.compare-table td{border:1px solid var(--border);padding:6px 8px;text-align:left;
+    vertical-align:top;}
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);
+    background:var(--accent);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;
+    font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;
+    max-width:calc(100vw - 32px);text-align:center;word-break:break-word;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  footer{margin-top:24px;padding:18px 0 8px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;gap:2px;border-top:var(--bw) solid var(--border);}
+  .foot-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  footer p{margin:0;font-size:.85rem;color:var(--text-dim);}
+  footer .made{font-size:.8rem;color:var(--text-dim);margin-top:2px;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  @media(max-width:420px){
+    .toolbar{flex-direction:column;align-items:stretch;}
+    .sortwrap{width:100%;justify-content:space-between;}
+    .sortwrap select{flex:1;}
+    .btnrow{width:100%;}
+    .compare-bar{width:calc(100% - 32px);border-radius:var(--radius);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div>
+        <h1>Rankoo</h1>
+        <p class="tag">World's best-selling software & apps</p>
+      </div>
+    </div>
+    <button id="themeBtn" class="theme-btn" aria-label="Toggle theme">◐ <span id="themeLabel">Dark</span></button>
+  </header>
+
+  <main>
+    <div class="search">
+      <input id="query" type="text" autocomplete="off" placeholder="search by name or publisher…">
+    </div>
+    <div class="cat-dropdown">
+      <button type="button" id="catToggle" class="cat-toggle" aria-expanded="false">
+        <span id="catToggleLabel">All categories</span><span class="caret">▾</span>
+      </button>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="refresh-row">
+      <button type="button" id="refreshBtn" class="tbtn refresh-btn"><span id="refreshIcon">↻</span> Refresh data</button>
+      <span class="last-updated" id="lastUpdated">Last updated: —</span>
+    </div>
+
+    <div class="toolbar">
+      <label class="sortwrap">sort
+        <select id="sortSelect">
+          <option value="rank">Rank (high → low)</option>
+          <option value="name">Name (A–Z)</option>
+          <option value="category">Category</option>
+        </select>
+      </label>
+      <div class="btnrow">
+        <button type="button" id="favToggle" class="tbtn">☆ Favorites</button>
+        <button type="button" id="exportCsv" class="tbtn">⇩ CSV</button>
+        <button type="button" id="exportJson" class="tbtn">⇩ JSON</button>
+      </div>
+    </div>
+
+    <p class="count" id="count"></p>
+    <section class="grid" id="results"></section>
+  </main>
+
+  <div class="compare-bar" id="compareBar" hidden>
+    <span id="compareCount">0 selected</span>
+    <button type="button" id="compareOpen" class="tbtn">Compare</button>
+    <button type="button" id="compareClear" class="tbtn">Clear</button>
+  </div>
+  <section class="compare-view" id="compareView" hidden></section>
+  <div class="toast" id="toast"></div>
+
+
+  <footer>
+    <div class="foot-inner">
+      <p id="copyright"></p>
+      <p class="made">badges are generated initials, not official logos · founded/origin data is best-effort</p>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var THEMES=["dark","light","oled","hc"];
+  var LABELS={dark:"Dark",light:"Light",oled:"OLED",hc:"HC"};
+  var ICONS={dark:"◐",light:"☀",oled:"●",hc:"◧"};
+  var idx=0;
+  var html=document.documentElement;
+  var themeBtn=document.getElementById("themeBtn");
+  var themeLabel=document.getElementById("themeLabel");
+  function applyTheme(){
+    var t=THEMES[idx];
+    html.setAttribute("data-theme",t);
+    themeLabel.textContent=LABELS[t];
+    themeBtn.firstChild.textContent=ICONS[t]+" ";
+  }
+  themeBtn.addEventListener("click",function(){idx=(idx+1)%THEMES.length;applyTheme();});
+  applyTheme();
+
+  var startYear=2026;
+  var curYear=new Date().getFullYear();
+  var yearStr=curYear>startYear?(startYear+"–"+curYear):String(startYear);
+  document.getElementById("copyright").textContent="© Manik Roy "+yearStr+". All Rights Reserved.";
+
+  var DATA=[
+    {cat:"Operating System",name:"Microsoft Windows",pub:"Microsoft",stat:"1.4B+ active devices",blurb:"World's most widely installed desktop OS, running on well over a billion PCs."},
+    {cat:"Operating System",name:"Android",pub:"Google",stat:"3B+ active devices",blurb:"Most-used mobile OS globally, powering the majority of the world's smartphones."},
+    {cat:"Operating System",name:"iOS",pub:"Apple",stat:"1.4B+ active devices",blurb:"Dominant premium mobile OS with the highest app-store consumer spend."},
+    {cat:"Productivity",name:"Microsoft 365 / Office",pub:"Microsoft",stat:"400M+ paid subscribers",blurb:"Word, Excel & PowerPoint remain the default office suite for business worldwide."},
+    {cat:"Productivity",name:"Google Workspace",pub:"Google",stat:"10M+ businesses",blurb:"Gmail, Docs & Sheets used by millions of businesses and billions of consumers."},
+    {cat:"Productivity",name:"Slack",pub:"Salesforce",stat:"38M+ daily active users",blurb:"Leading team-messaging app adopted across enterprises globally."},
+    {cat:"Creative & Design",name:"Adobe Photoshop",pub:"Adobe",stat:"90M+ monthly active users",blurb:"Industry-standard image editor and the most recognized creative software brand."},
+    {cat:"Creative & Design",name:"Adobe Creative Cloud",pub:"Adobe",stat:"33M+ paid subscribers",blurb:"Subscription bundle (Photoshop, Illustrator, Premiere) with tens of millions of subscribers."},
+    {cat:"Creative & Design",name:"Canva",pub:"Canva",stat:"170M+ monthly active users",blurb:"Simplified design app with over 100 million monthly active users."},
+    {cat:"Security",name:"Norton 360",pub:"Gen Digital",stat:"40M+ paid users",blurb:"One of the best-selling consumer antivirus & security suites worldwide."},
+    {cat:"Security",name:"McAfee Total Protection",pub:"McAfee",stat:"20M+ paid users",blurb:"Long-running top seller in consumer cybersecurity software."},
+    {cat:"Messaging & Social",name:"WhatsApp",pub:"Meta",stat:"3.3B+ monthly active users",blurb:"World's most-used messaging app with over 2 billion users."},
+    {cat:"Messaging & Social",name:"Facebook",pub:"Meta",stat:"3.07B+ monthly active users",blurb:"Largest social network by monthly active users globally."},
+    {cat:"Messaging & Social",name:"Instagram",pub:"Meta",stat:"3B+ monthly active users",blurb:"Top photo & short-video social app with over a billion active users."},
+    {cat:"Messaging & Social",name:"TikTok",pub:"ByteDance",stat:"2B+ monthly active users",blurb:"Fastest-growing short-video app, a global top-download chart-topper."},
+    {cat:"Messaging & Social",name:"WeChat",pub:"Tencent",stat:"1.3B+ monthly active users",blurb:"China's all-in-one super-app for chat, payments and mini-programs."},
+    {cat:"Gaming",name:"Minecraft",pub:"Mojang / Microsoft",stat:"300M+ copies sold",blurb:"Best-selling video game of all time with over 300 million copies sold."},
+    {cat:"Gaming",name:"Grand Theft Auto V",pub:"Rockstar Games",stat:"215M+ copies sold",blurb:"One of the highest-grossing entertainment products ever released."},
+    {cat:"Gaming",name:"Fortnite",pub:"Epic Games",stat:"650M+ registered accounts",blurb:"Free-to-play battle royale generating billions in in-app revenue."},
+    {cat:"Gaming",name:"PUBG Mobile",pub:"Krafton / Tencent",stat:"1B+ downloads",blurb:"Top-grossing mobile battle royale across global app stores."},
+    {cat:"Business & Enterprise",name:"Salesforce",pub:"Salesforce",stat:"150K+ enterprise customers",blurb:"World's leading CRM platform used across enterprise sales teams."},
+    {cat:"Business & Enterprise",name:"SAP ERP",pub:"SAP",stat:"440K+ customers worldwide",blurb:"Dominant enterprise resource planning software for large organizations."},
+    {cat:"Business & Enterprise",name:"Oracle Database",pub:"Oracle",stat:"430K+ customers worldwide",blurb:"Best-selling relational database software for enterprise workloads."},
+    {cat:"Utilities & Browsers",name:"Google Chrome",pub:"Google",stat:"3.3B+ users",blurb:"World's most-used web browser by a wide margin."},
+    {cat:"Utilities & Browsers",name:"Zoom",pub:"Zoom",stat:"300M+ daily meeting participants",blurb:"Leading video-conferencing app, a category leader since 2020."},
+    {cat:"Utilities & Browsers",name:"Spotify",pub:"Spotify",stat:"300M+ paid subscribers",blurb:"Top music-streaming app by paid subscribers worldwide."},
+
+    {cat:"Operating System",name:"macOS",pub:"Apple",stat:"100M+ active devices",blurb:"Apple's desktop OS, standard across the Mac lineup worldwide."},
+    {cat:"Operating System",name:"Linux (Ubuntu)",pub:"Canonical",stat:"40M+ installations",blurb:"Leading open-source desktop & server OS distribution."},
+    {cat:"Operating System",name:"ChromeOS",pub:"Google",stat:"40M+ active devices",blurb:"Lightweight OS powering Chromebooks in education and business."},
+
+    {cat:"Productivity",name:"Notion",pub:"Notion Labs",stat:"30M+ users",blurb:"All-in-one workspace for notes, docs and project tracking."},
+    {cat:"Productivity",name:"Trello",pub:"Atlassian",stat:"50M+ registered users",blurb:"Visual kanban-style task and project management board."},
+    {cat:"Productivity",name:"Asana",pub:"Asana Inc.",stat:"150K+ paying customers",blurb:"Popular work-management platform for teams and projects."},
+    {cat:"Productivity",name:"Evernote",pub:"Bending Spoons",stat:"225M+ registered users",blurb:"Long-running note-taking and organization app."},
+    {cat:"Productivity",name:"Todoist",pub:"Doist",stat:"42M+ users",blurb:"Widely used to-do list and task management app."},
+    {cat:"Productivity",name:"Monday.com",pub:"monday.com",stat:"225K+ customers",blurb:"Work OS platform for managing projects and workflows."},
+    {cat:"Productivity",name:"LibreOffice",pub:"The Document Foundation",stat:"200M+ downloads",blurb:"Free open-source office suite, alternative to Microsoft Office."},
+    {cat:"Productivity",name:"WPS Office",pub:"Kingsoft",stat:"1.2B+ installs",blurb:"Popular free office suite, especially strong in Asia."},
+
+    {cat:"Creative & Design",name:"Figma",pub:"Figma Inc.",stat:"4M+ users",blurb:"Leading collaborative interface design and prototyping tool."},
+    {cat:"Creative & Design",name:"Procreate",pub:"Savage Interactive",stat:"12M+ copies sold",blurb:"Best-selling digital illustration app for iPad."},
+    {cat:"Creative & Design",name:"CapCut",pub:"ByteDance",stat:"300M+ monthly active users",blurb:"Top mobile video-editing app for short-form content."},
+
+    {cat:"Security",name:"Kaspersky",pub:"Kaspersky Lab",stat:"400M+ protected users",blurb:"Global antivirus and internet-security suite provider."},
+    {cat:"Security",name:"Avast",pub:"Gen Digital",stat:"435M+ users",blurb:"One of the world's most-installed free antivirus apps."},
+    {cat:"Security",name:"Malwarebytes",pub:"Malwarebytes Inc.",stat:"60M+ users",blurb:"Popular anti-malware tool for consumers and businesses."},
+    {cat:"Security",name:"Bitdefender",pub:"Bitdefender",stat:"500M+ protected systems",blurb:"Award-winning antivirus and endpoint security software."},
+
+    {cat:"Messaging & Social",name:"Telegram",pub:"Telegram FZ-LLC",stat:"950M+ monthly active users",blurb:"Fast-growing encrypted messaging app with large channels."},
+    {cat:"Messaging & Social",name:"Snapchat",pub:"Snap Inc.",stat:"800M+ monthly active users",blurb:"Pioneer of disappearing messages and social camera features."},
+    {cat:"Messaging & Social",name:"LinkedIn",pub:"Microsoft",stat:"1B+ registered members",blurb:"World's largest professional networking platform."},
+    {cat:"Messaging & Social",name:"Pinterest",pub:"Pinterest Inc.",stat:"500M+ monthly active users",blurb:"Visual discovery and idea-bookmarking platform."},
+    {cat:"Messaging & Social",name:"Discord",pub:"Discord Inc.",stat:"200M+ monthly active users",blurb:"Popular chat and voice platform for communities and gamers."},
+    {cat:"Messaging & Social",name:"X (Twitter)",pub:"X Corp",stat:"550M+ monthly active users",blurb:"Global real-time news and public conversation platform."},
+    {cat:"Messaging & Social",name:"Line",pub:"LY Corporation",stat:"200M+ monthly active users",blurb:"Dominant messaging super-app across Japan and Southeast Asia."},
+
+    {cat:"Gaming",name:"Candy Crush Saga",pub:"King / Activision Blizzard",stat:"3B+ downloads",blurb:"One of the most-downloaded mobile puzzle games ever."},
+    {cat:"Gaming",name:"Roblox",pub:"Roblox Corporation",stat:"380M+ monthly active users",blurb:"User-generated gaming platform popular with younger players."},
+    {cat:"Gaming",name:"Among Us",pub:"InnerSloth",stat:"500M+ downloads",blurb:"Breakout social-deduction multiplayer hit."},
+    {cat:"Gaming",name:"Call of Duty: Mobile",pub:"Activision",stat:"650M+ downloads",blurb:"Top-grossing mobile entry in the Call of Duty franchise."},
+    {cat:"Gaming",name:"Clash of Clans",pub:"Supercell",stat:"500M+ downloads",blurb:"Long-running strategy game and mobile gaming staple."},
+    {cat:"Gaming",name:"Genshin Impact",pub:"HoYoverse",stat:"500M+ downloads",blurb:"High-grossing open-world action RPG across mobile and PC."},
+    {cat:"Gaming",name:"Pokémon GO",pub:"Niantic",stat:"1B+ downloads",blurb:"Pioneering augmented-reality mobile game phenomenon."},
+    {cat:"Gaming",name:"Subway Surfers",pub:"SYBO Games",stat:"4B+ downloads",blurb:"One of the most-downloaded mobile games of all time."},
+
+    {cat:"Business & Enterprise",name:"Microsoft Dynamics 365",pub:"Microsoft",stat:"65K+ organizations",blurb:"Enterprise CRM and ERP suite integrated with Microsoft 365."},
+    {cat:"Business & Enterprise",name:"HubSpot",pub:"HubSpot Inc.",stat:"205K+ customers",blurb:"Popular CRM and marketing platform for growing businesses."},
+    {cat:"Business & Enterprise",name:"Zendesk",pub:"Zendesk Inc.",stat:"100K+ businesses",blurb:"Leading customer service and support-ticketing software."},
+    {cat:"Business & Enterprise",name:"Workday",pub:"Workday Inc.",stat:"10,000+ organizations",blurb:"Enterprise HR and financial management cloud software."},
+    {cat:"Business & Enterprise",name:"ServiceNow",pub:"ServiceNow Inc.",stat:"8,100+ customers",blurb:"Enterprise workflow and IT service management platform."},
+
+    {cat:"Utilities & Browsers",name:"Mozilla Firefox",pub:"Mozilla",stat:"180M+ monthly active users",blurb:"Long-standing open-source web browser focused on privacy."},
+    {cat:"Utilities & Browsers",name:"Microsoft Edge",pub:"Microsoft",stat:"650M+ monthly active users",blurb:"Default Windows browser, built on the Chromium engine."},
+    {cat:"Utilities & Browsers",name:"Safari",pub:"Apple",stat:"1B+ users",blurb:"Default browser bundled across all Apple devices."},
+    {cat:"Utilities & Browsers",name:"Opera",pub:"Opera Software",stat:"380M+ monthly active users",blurb:"Feature-rich browser with built-in VPN and ad-blocker."},
+    {cat:"Utilities & Browsers",name:"WinRAR",pub:"RARLAB",stat:"500M+ users worldwide",blurb:"One of the most widely used file-compression utilities."},
+    {cat:"Utilities & Browsers",name:"CCleaner",pub:"Gen Digital",stat:"2.5B+ downloads",blurb:"Best-selling system cleanup and optimization utility."},
+    {cat:"Utilities & Browsers",name:"VLC Media Player",pub:"VideoLAN",stat:"3.5B+ downloads",blurb:"Best-selling free, open-source media player worldwide."},
+
+    {cat:"Finance & Payments",name:"PayPal",pub:"PayPal Holdings",stat:"430M+ active accounts",blurb:"World's most widely used online payment platform."},
+    {cat:"Finance & Payments",name:"Venmo",pub:"PayPal",stat:"90M+ users",blurb:"Popular peer-to-peer payments app in the United States."},
+    {cat:"Finance & Payments",name:"Cash App",pub:"Block Inc.",stat:"57M+ monthly active users",blurb:"Mobile app for payments, banking and stock/crypto trading."},
+    {cat:"Finance & Payments",name:"Alipay",pub:"Ant Group",stat:"1.3B+ users",blurb:"Dominant mobile payments super-app across China."},
+    {cat:"Finance & Payments",name:"Paytm",pub:"Paytm",stat:"300M+ registered users",blurb:"Leading digital payments and financial services app in India."},
+    {cat:"Finance & Payments",name:"Revolut",pub:"Revolut Ltd.",stat:"45M+ customers",blurb:"Fast-growing digital banking and money-management app."},
+    {cat:"Finance & Payments",name:"Google Pay",pub:"Google",stat:"150M+ users",blurb:"Widely used mobile wallet and contactless payments app."},
+
+    {cat:"Cloud & Storage",name:"Dropbox",pub:"Dropbox Inc.",stat:"700M+ registered users",blurb:"Pioneer of cloud file storage and sharing services."},
+    {cat:"Cloud & Storage",name:"Google Drive",pub:"Google",stat:"1B+ users",blurb:"Widely used cloud storage bundled with every Google account."},
+    {cat:"Cloud & Storage",name:"iCloud",pub:"Apple",stat:"850M+ users",blurb:"Default cloud storage and backup service for Apple devices."},
+    {cat:"Cloud & Storage",name:"OneDrive",pub:"Microsoft",stat:"250M+ users",blurb:"Cloud storage integrated across Windows and Microsoft 365."},
+    {cat:"Cloud & Storage",name:"Box",pub:"Box Inc.",stat:"115K+ businesses",blurb:"Enterprise-focused cloud content and file-sharing platform."},
+
+    {cat:"Developer Tools",name:"Visual Studio Code",pub:"Microsoft",stat:"20M+ monthly active users",blurb:"World's most popular free source-code editor."},
+    {cat:"Developer Tools",name:"GitHub",pub:"Microsoft",stat:"100M+ developers",blurb:"Largest platform for hosting and collaborating on code."},
+    {cat:"Developer Tools",name:"GitLab",pub:"GitLab Inc.",stat:"30M+ registered users",blurb:"DevOps platform combining source control and CI/CD."},
+    {cat:"Developer Tools",name:"Postman",pub:"Postman Inc.",stat:"30M+ developers",blurb:"Leading API development and testing platform."},
+    {cat:"Developer Tools",name:"Docker",pub:"Docker Inc.",stat:"20M+ monthly active developers",blurb:"Standard tool for building and running containerized apps."},
+
+    {cat:"Health & Fitness",name:"MyFitnessPal",pub:"Under Armour / Francisco Partners",stat:"200M+ registered users",blurb:"Best-selling calorie and nutrition tracking app."},
+    {cat:"Health & Fitness",name:"Strava",pub:"Strava Inc.",stat:"125M+ athletes",blurb:"Leading social fitness-tracking app for runners and cyclists."},
+    {cat:"Health & Fitness",name:"Headspace",pub:"Headspace Inc.",stat:"70M+ users",blurb:"Popular guided meditation and mental-wellness app."},
+    {cat:"Health & Fitness",name:"Calm",pub:"Calm.com",stat:"150M+ downloads",blurb:"Top-grossing meditation and sleep app worldwide."},
+
+    {cat:"Education",name:"Duolingo",pub:"Duolingo Inc.",stat:"500M+ registered users",blurb:"World's most downloaded language-learning app."},
+    {cat:"Education",name:"Khan Academy",pub:"Khan Academy",stat:"155M+ registered users",blurb:"Free nonprofit platform for K-12 and college learning."},
+    {cat:"Education",name:"Coursera",pub:"Coursera Inc.",stat:"148M+ registered learners",blurb:"Leading platform for online university and professional courses."},
+    {cat:"Education",name:"Udemy",pub:"Udemy Inc.",stat:"73M+ learners",blurb:"Large marketplace of paid and free online courses."},
+
+    {cat:"Music & Video Streaming",name:"Netflix",pub:"Netflix Inc.",stat:"325M+ paid subscribers",blurb:"World's leading paid video-streaming service."},
+    {cat:"Music & Video Streaming",name:"YouTube",pub:"Google",stat:"2.8B+ monthly active users",blurb:"World's largest video platform by monthly active users."},
+    {cat:"Music & Video Streaming",name:"Amazon Prime Video",pub:"Amazon",stat:"200M+ subscribers",blurb:"Major streaming service bundled with Amazon Prime."},
+    {cat:"Music & Video Streaming",name:"Disney+",pub:"Disney",stat:"120M+ subscribers",blurb:"Fast-growing streaming home for Disney, Marvel & Pixar."},
+    {cat:"Music & Video Streaming",name:"Apple Music",pub:"Apple",stat:"100M+ subscribers",blurb:"Apple's flagship paid music-streaming subscription service."},
+
+    {cat:"Travel & Navigation",name:"Uber",pub:"Uber Technologies",stat:"150M+ monthly active users",blurb:"Leading ride-hailing app operating in thousands of cities."},
+    {cat:"Travel & Navigation",name:"Lyft",pub:"Lyft Inc.",stat:"24M+ active riders",blurb:"Major ride-hailing service across North America."},
+    {cat:"Travel & Navigation",name:"Airbnb",pub:"Airbnb Inc.",stat:"150M+ users",blurb:"World's largest home and experience booking platform."},
+    {cat:"Travel & Navigation",name:"Booking.com",pub:"Booking Holdings",stat:"500M+ downloads",blurb:"Leading online travel and hotel booking app."},
+    {cat:"Travel & Navigation",name:"Expedia",pub:"Expedia Group",stat:"100M+ downloads",blurb:"Popular all-in-one travel booking platform."},
+    {cat:"Travel & Navigation",name:"Grab",pub:"Grab Holdings",stat:"40M+ monthly active users",blurb:"Southeast Asia's leading ride-hailing and delivery super-app."},
+    {cat:"Travel & Navigation",name:"DiDi",pub:"DiDi Global",stat:"550M+ annual active users",blurb:"China's dominant ride-hailing platform."},
+    {cat:"Travel & Navigation",name:"Ola",pub:"ANI Technologies",stat:"250M+ registered users",blurb:"Leading ride-hailing app across India."},
+    {cat:"Travel & Navigation",name:"Waze",pub:"Google",stat:"140M+ monthly active users",blurb:"Community-driven GPS navigation app."},
+    {cat:"Travel & Navigation",name:"Google Maps",pub:"Google",stat:"1B+ monthly active users",blurb:"World's most-used mapping and navigation app."},
+    {cat:"Travel & Navigation",name:"Trip.com",pub:"Trip.com Group",stat:"400M+ downloads",blurb:"Major Asia-based travel booking app."},
+    {cat:"Travel & Navigation",name:"Skyscanner",pub:"Skyscanner Ltd.",stat:"100M+ downloads",blurb:"Popular flight and travel price comparison app."},
+    {cat:"Travel & Navigation",name:"Tripadvisor",pub:"Tripadvisor Inc.",stat:"460M+ monthly users",blurb:"Leading travel reviews and trip-planning platform."},
+    {cat:"Travel & Navigation",name:"Careem",pub:"Careem (Uber)",stat:"50M+ users",blurb:"Leading ride-hailing super-app across the Middle East."},
+    {cat:"Travel & Navigation",name:"Trivago",pub:"Trivago N.V.",stat:"150M+ monthly visits",blurb:"Popular hotel price-comparison search engine."},
+    {cat:"Travel & Navigation",name:"IRCTC Rail Connect",pub:"Indian Railways / CRIS",stat:"100M+ downloads",blurb:"India's official train-ticket booking app."},
+    {cat:"Travel & Navigation",name:"MakeMyTrip",pub:"MakeMyTrip Ltd.",stat:"100M+ downloads",blurb:"Leading Indian travel and hotel booking platform."},
+    {cat:"Travel & Navigation",name:"Klook",pub:"Klook Travel Technology",stat:"60M+ downloads",blurb:"Popular Asia-based travel activities and tours booking app."},
+    {cat:"Travel & Navigation",name:"Agoda",pub:"Booking Holdings",stat:"70M+ downloads",blurb:"Popular Asia-focused hotel and travel booking app."},
+
+    {cat:"Shopping & E-commerce",name:"Amazon Shopping",pub:"Amazon",stat:"300M+ active customers",blurb:"World's largest online shopping marketplace app."},
+    {cat:"Shopping & E-commerce",name:"eBay",pub:"eBay Inc.",stat:"130M+ active buyers",blurb:"Pioneer of online auction and marketplace shopping."},
+    {cat:"Shopping & E-commerce",name:"AliExpress",pub:"Alibaba Group",stat:"150M+ active buyers",blurb:"Popular global cross-border shopping marketplace."},
+    {cat:"Shopping & E-commerce",name:"Shopee",pub:"Sea Limited",stat:"200M+ monthly active users",blurb:"Leading e-commerce app across Southeast Asia."},
+    {cat:"Shopping & E-commerce",name:"Mercado Libre",pub:"MercadoLibre Inc.",stat:"100M+ active users",blurb:"Latin America's largest e-commerce platform."},
+    {cat:"Shopping & E-commerce",name:"Etsy",pub:"Etsy Inc.",stat:"90M+ active buyers",blurb:"Leading marketplace for handmade and vintage goods."},
+    {cat:"Shopping & E-commerce",name:"Walmart",pub:"Walmart Inc.",stat:"120M+ app users",blurb:"Major US retail chain's shopping and grocery app."},
+    {cat:"Shopping & E-commerce",name:"Flipkart",pub:"Flipkart Group",stat:"450M+ registered users",blurb:"India's leading e-commerce marketplace."},
+    {cat:"Shopping & E-commerce",name:"Wish",pub:"ContextLogic Inc.",stat:"90M+ monthly active users",blurb:"Budget-focused global online shopping app."},
+    {cat:"Shopping & E-commerce",name:"Temu",pub:"PDD Holdings",stat:"100M+ monthly active users",blurb:"Fast-growing discount cross-border shopping app."},
+    {cat:"Shopping & E-commerce",name:"Shein",pub:"Shein Group",stat:"150M+ monthly active users",blurb:"Leading fast-fashion e-commerce app worldwide."},
+    {cat:"Shopping & E-commerce",name:"Wayfair",pub:"Wayfair Inc.",stat:"26M+ active customers",blurb:"Popular online home goods and furniture retailer."},
+    {cat:"Shopping & E-commerce",name:"Rakuten",pub:"Rakuten Group",stat:"1.5B+ members",blurb:"Japan's leading e-commerce and rewards platform."},
+    {cat:"Shopping & E-commerce",name:"Zalando",pub:"Zalando SE",stat:"50M+ active customers",blurb:"Europe's leading online fashion retailer."},
+    {cat:"Shopping & E-commerce",name:"Yelp",pub:"Yelp Inc.",stat:"80M+ monthly unique visitors",blurb:"Popular app for local business reviews and recommendations."},
+
+    {cat:"Food Delivery",name:"DoorDash",pub:"DoorDash Inc.",stat:"42M+ monthly active users",blurb:"Largest food-delivery platform in the United States."},
+    {cat:"Food Delivery",name:"Uber Eats",pub:"Uber Technologies",stat:"90M+ monthly active users",blurb:"Major global food and grocery delivery app."},
+    {cat:"Food Delivery",name:"Deliveroo",pub:"Deliveroo plc",stat:"8M+ monthly active users",blurb:"Leading food-delivery app across Europe and Asia."},
+    {cat:"Food Delivery",name:"Zomato",pub:"Eternal Ltd.",stat:"200M+ downloads",blurb:"India's leading food delivery and restaurant discovery app."},
+    {cat:"Food Delivery",name:"Swiggy",pub:"Swiggy Ltd.",stat:"180M+ registered users",blurb:"Popular Indian food and grocery delivery platform."},
+    {cat:"Food Delivery",name:"Just Eat",pub:"Just Eat Takeaway",stat:"100M+ registered users",blurb:"Major European online food-ordering marketplace."},
+    {cat:"Food Delivery",name:"Grubhub",pub:"Grubhub Inc.",stat:"33M+ active diners",blurb:"Well-known US food-delivery and takeout app."},
+    {cat:"Food Delivery",name:"Instacart",pub:"Instacart Inc.",stat:"14M+ monthly active users",blurb:"Leading grocery delivery and pickup app in North America."},
+    {cat:"Food Delivery",name:"Meituan",pub:"Meituan",stat:"700M+ annual active users",blurb:"China's dominant local services and food-delivery super-app."},
+    {cat:"Food Delivery",name:"OpenTable",pub:"Booking Holdings",stat:"1B+ diners seated annually",blurb:"Popular restaurant reservation and dining app."},
+
+    {cat:"Photo & Video Editing",name:"Snapseed",pub:"Google",stat:"100M+ downloads",blurb:"Highly rated free mobile photo-editing app."},
+    {cat:"Photo & Video Editing",name:"VSCO",pub:"Visual Supply Co.",stat:"100M+ downloads",blurb:"Popular photo editing and creative community app."},
+    {cat:"Photo & Video Editing",name:"Adobe Lightroom",pub:"Adobe",stat:"500M+ downloads",blurb:"Leading professional photo editing and organization app."},
+    {cat:"Photo & Video Editing",name:"PicsArt",pub:"PicsArt Inc.",stat:"150M+ monthly active users",blurb:"Popular all-in-one photo and video editing app."},
+    {cat:"Photo & Video Editing",name:"InShot",pub:"InShot Inc.",stat:"1B+ downloads",blurb:"Best-selling mobile video editing app."},
+    {cat:"Photo & Video Editing",name:"GarageBand",pub:"Apple",stat:"pre-installed on 1B+ devices",blurb:"Popular free music creation app bundled with Apple devices."},
+    {cat:"Photo & Video Editing",name:"FL Studio",pub:"Image-Line",stat:"20M+ users",blurb:"Best-selling digital audio workstation for music production."},
+    {cat:"Photo & Video Editing",name:"OBS Studio",pub:"OBS Project",stat:"100M+ downloads",blurb:"Leading free screen-recording and live-streaming software."},
+    {cat:"Photo & Video Editing",name:"Google Photos",pub:"Google",stat:"1B+ users",blurb:"World's most-used cloud photo storage and backup app."},
+
+    {cat:"Dating",name:"Tinder",pub:"Match Group",stat:"75M+ monthly active users",blurb:"World's most-downloaded dating app."},
+    {cat:"Dating",name:"Bumble",pub:"Bumble Inc.",stat:"50M+ monthly active users",blurb:"Popular dating app where women message first."},
+    {cat:"Dating",name:"Hinge",pub:"Match Group",stat:"20M+ monthly active users",blurb:"Fast-growing relationship-focused dating app."},
+    {cat:"Dating",name:"OkCupid",pub:"Match Group",stat:"10M+ monthly active users",blurb:"Long-running dating app known for detailed matching."},
+    {cat:"Dating",name:"Match.com",pub:"Match Group",stat:"20M+ subscribers",blurb:"One of the original online dating platforms."},
+
+    {cat:"News & Weather",name:"Google News",pub:"Google",stat:"1B+ downloads",blurb:"Personalized global news aggregation app."},
+    {cat:"News & Weather",name:"The Weather Channel",pub:"The Weather Company / IBM",stat:"100M+ downloads",blurb:"One of the most-used weather forecast apps."},
+    {cat:"News & Weather",name:"AccuWeather",pub:"AccuWeather Inc.",stat:"100M+ downloads",blurb:"Popular global weather forecasting app."},
+    {cat:"News & Weather",name:"Flipboard",pub:"Flipboard Inc.",stat:"145M+ users",blurb:"Personalized news and magazine-style content app."},
+    {cat:"News & Weather",name:"ESPN",pub:"The Walt Disney Company",stat:"120M+ downloads",blurb:"Leading sports news and live-scores app worldwide."},
+
+    {cat:"AI Tools",name:"ChatGPT",pub:"OpenAI",stat:"900M+ weekly active users",blurb:"World's most widely used conversational AI assistant."},
+    {cat:"AI Tools",name:"Microsoft Copilot",pub:"Microsoft",stat:"150M+ monthly active users",blurb:"AI assistant integrated across Microsoft 365 and Windows."},
+    {cat:"AI Tools",name:"Google Gemini",pub:"Google",stat:"450M+ monthly active users",blurb:"Google's flagship multimodal AI assistant app."},
+    {cat:"AI Tools",name:"Midjourney",pub:"Midjourney Inc.",stat:"20M+ users",blurb:"Leading AI image-generation platform."},
+    {cat:"AI Tools",name:"Perplexity AI",pub:"Perplexity AI",stat:"30M+ monthly active users",blurb:"Fast-growing AI-powered answer engine."},
+    {cat:"AI Tools",name:"Claude",pub:"Anthropic",stat:"30M+ users",blurb:"AI assistant built by Anthropic for chat and work tasks."},
+    {cat:"AI Tools",name:"DeepSeek",pub:"DeepSeek",stat:"20M+ downloads",blurb:"Fast-growing open-weight AI chatbot app."},
+    {cat:"AI Tools",name:"Adobe Firefly",pub:"Adobe",stat:"12M+ users",blurb:"Adobe's generative AI tool for images and design."},
+
+    {cat:"Communication & Meetings",name:"Google Meet",pub:"Google",stat:"300M+ daily meeting participants",blurb:"Widely used video-conferencing app integrated with Google Workspace."},
+    {cat:"Communication & Meetings",name:"Microsoft Teams",pub:"Microsoft",stat:"320M+ monthly active users",blurb:"Leading business chat and video-meeting platform."},
+    {cat:"Communication & Meetings",name:"Cisco Webex",pub:"Cisco Systems",stat:"600M+ users",blurb:"Enterprise-grade video conferencing and collaboration suite."},
+    {cat:"Communication & Meetings",name:"GoToMeeting",pub:"GoTo",stat:"20M+ users",blurb:"Established online meeting and webinar software."},
+    {cat:"Communication & Meetings",name:"Google Voice",pub:"Google",stat:"100M+ downloads",blurb:"Popular free calling, texting and voicemail app."},
+
+    {cat:"Smart Home & IoT",name:"Google Home",pub:"Google",stat:"100M+ devices connected",blurb:"App for controlling Google smart-home devices."},
+    {cat:"Smart Home & IoT",name:"Amazon Alexa",pub:"Amazon",stat:"600M+ Alexa-enabled devices sold",blurb:"Voice assistant powering hundreds of millions of smart devices."},
+    {cat:"Smart Home & IoT",name:"Samsung SmartThings",pub:"Samsung",stat:"300M+ devices connected",blurb:"Popular smart-home hub and device-control app."},
+    {cat:"Smart Home & IoT",name:"Ring",pub:"Amazon",stat:"40M+ active users",blurb:"Best-selling video doorbell and home-security app."},
+
+    {cat:"Password Managers & VPN",name:"LastPass",pub:"LastPass",stat:"33M+ users",blurb:"One of the most widely used password manager apps."},
+    {cat:"Password Managers & VPN",name:"1Password",pub:"AgileBits",stat:"150,000+ businesses",blurb:"Popular password manager for individuals and teams."},
+    {cat:"Password Managers & VPN",name:"Dashlane",pub:"Dashlane Inc.",stat:"20M+ users",blurb:"Well-known password manager and digital identity app."},
+    {cat:"Password Managers & VPN",name:"Bitwarden",pub:"Bitwarden Inc.",stat:"10M+ users",blurb:"Leading open-source password manager."},
+    {cat:"Password Managers & VPN",name:"NordVPN",pub:"Nord Security",stat:"14M+ users",blurb:"One of the world's best-selling VPN services."},
+    {cat:"Password Managers & VPN",name:"ExpressVPN",pub:"Express VPN International",stat:"3M+ subscribers",blurb:"Popular premium VPN service for privacy and streaming."},
+    {cat:"Password Managers & VPN",name:"Surfshark",pub:"Surfshark B.V.",stat:"3.4M+ subscribers",blurb:"Fast-growing budget-friendly VPN app."},
+
+    {cat:"Email & Maps",name:"Microsoft Outlook",pub:"Microsoft",stat:"500M+ monthly active users",blurb:"Widely used email and calendar app for work and personal use."},
+    {cat:"Email & Maps",name:"Gmail",pub:"Google",stat:"1.8B+ users",blurb:"World's most-used email service and app."},
+    {cat:"Email & Maps",name:"Yahoo Mail",pub:"Yahoo",stat:"225M+ monthly active users",blurb:"One of the earliest and still widely used webmail services."},
+    {cat:"Email & Maps",name:"Apple Maps",pub:"Apple",stat:"1B+ users",blurb:"Default navigation app bundled with Apple devices."},
+
+    {cat:"Reading & Audiobooks",name:"Amazon Kindle",pub:"Amazon",stat:"90M+ app users",blurb:"World's leading e-book reading app and platform."},
+    {cat:"Reading & Audiobooks",name:"Audible",pub:"Amazon",stat:"100M+ listeners worldwide",blurb:"Best-selling audiobook and podcast subscription app."},
+    {cat:"Reading & Audiobooks",name:"Google Play Books",pub:"Google",stat:"100M+ downloads",blurb:"Popular app for e-books and audiobooks on Android."},
+
+    {cat:"Finance & Payments",name:"Coinbase",pub:"Coinbase Global",stat:"110M+ verified users",blurb:"Largest US-based cryptocurrency exchange app."},
+    {cat:"Finance & Payments",name:"Binance",pub:"Binance",stat:"250M+ registered users",blurb:"World's largest cryptocurrency exchange by trading volume."},
+    {cat:"Finance & Payments",name:"Crypto.com",pub:"Crypto.com",stat:"100M+ users",blurb:"Popular cryptocurrency exchange and payments app."},
+    {cat:"Finance & Payments",name:"Chase Mobile",pub:"JPMorgan Chase",stat:"60M+ active users",blurb:"Leading US mobile banking app."},
+    {cat:"Finance & Payments",name:"Robinhood",pub:"Robinhood Markets",stat:"25M+ funded customers",blurb:"Popular commission-free stock and crypto trading app."},
+    {cat:"Finance & Payments",name:"Wise",pub:"Wise plc",stat:"12.8M+ active customers",blurb:"Leading international money-transfer app."},
+    {cat:"Finance & Payments",name:"Zelle",pub:"Early Warning Services",stat:"151M+ enrolled users",blurb:"Widely used bank-to-bank instant payments network."},
+    {cat:"Finance & Payments",name:"eToro",pub:"eToro Group",stat:"35M+ registered users",blurb:"Popular social trading and investing platform."},
+
+    {cat:"Productivity",name:"Basecamp",pub:"37signals",stat:"3.5M+ accounts",blurb:"All-in-one project management and team communication tool."},
+    {cat:"Productivity",name:"ClickUp",pub:"ClickUp",stat:"10M+ users",blurb:"Fast-growing all-in-one productivity and project-management platform."},
+    {cat:"Productivity",name:"Airtable",pub:"Airtable Inc.",stat:"500,000+ organizations",blurb:"Popular spreadsheet-database hybrid for teams."},
+    {cat:"Productivity",name:"DocuSign",pub:"DocuSign Inc.",stat:"1.6M+ customers",blurb:"Leading e-signature and agreement management platform."},
+    {cat:"Productivity",name:"Zoho CRM",pub:"Zoho Corporation",stat:"250,000+ businesses",blurb:"Widely used cloud CRM for small and mid-size businesses."},
+    {cat:"Productivity",name:"Pipedrive",pub:"Pipedrive Inc.",stat:"100,000+ companies",blurb:"Popular sales-focused CRM software."},
+    {cat:"Productivity",name:"QuickBooks",pub:"Intuit",stat:"7M+ subscribers",blurb:"Best-selling small-business accounting software."},
+    {cat:"Productivity",name:"Xero",pub:"Xero Limited",stat:"4.2M+ subscribers",blurb:"Leading cloud accounting software for small businesses."},
+    {cat:"Productivity",name:"FreshBooks",pub:"FreshBooks",stat:"30M+ users",blurb:"Popular invoicing and accounting app for freelancers."},
+    {cat:"Productivity",name:"Square",pub:"Block Inc.",stat:"4M+ sellers",blurb:"Widely used point-of-sale and payments platform."},
+    {cat:"Productivity",name:"Shopify",pub:"Shopify Inc.",stat:"5M+ merchants",blurb:"Leading e-commerce platform for online stores."},
+    {cat:"Productivity",name:"CamScanner",pub:"INTSIG Information",stat:"600M+ users",blurb:"Best-selling mobile document scanning app."},
+    {cat:"Productivity",name:"Adobe Scan",pub:"Adobe",stat:"100M+ downloads",blurb:"Popular free mobile scanning and PDF app."},
+    {cat:"Productivity",name:"Miro",pub:"Miro",stat:"90M+ users",blurb:"Leading online collaborative whiteboard platform."},
+    {cat:"Productivity",name:"Loom",pub:"Atlassian",stat:"25M+ users",blurb:"Popular async video messaging tool for work."},
+    {cat:"Productivity",name:"Grammarly",pub:"Grammarly Inc.",stat:"40M+ daily active users",blurb:"Best-selling AI writing assistant and grammar checker."},
+
+    {cat:"Business & Enterprise",name:"Atlassian Jira",pub:"Atlassian",stat:"300,000+ organizations",blurb:"Leading issue-tracking and agile project-management tool."},
+    {cat:"Business & Enterprise",name:"Atlassian Confluence",pub:"Atlassian",stat:"89,000+ customers",blurb:"Popular team documentation and knowledge-base platform."},
+
+    {cat:"Security",name:"ESET",pub:"ESET spol. s r.o.",stat:"110M+ users",blurb:"Well-known antivirus and endpoint-security software."},
+    {cat:"Security",name:"Trend Micro",pub:"Trend Micro Inc.",stat:"500,000+ businesses protected",blurb:"Global enterprise and consumer cybersecurity provider."},
+    {cat:"Security",name:"TeamViewer",pub:"TeamViewer SE",stat:"2.5B+ installations",blurb:"Best-selling remote desktop and support software."},
+    {cat:"Security",name:"AnyDesk",pub:"AnyDesk Software",stat:"600M+ downloads",blurb:"Popular fast remote-desktop access application."},
+
+    {cat:"Utilities & Browsers",name:"Brave",pub:"Brave Software",stat:"80M+ monthly active users",blurb:"Privacy-focused browser with built-in ad-blocking."},
+    {cat:"Utilities & Browsers",name:"Tor Browser",pub:"The Tor Project",stat:"2M+ daily users",blurb:"Leading privacy browser for anonymous web browsing."},
+    {cat:"Utilities & Browsers",name:"DuckDuckGo",pub:"DuckDuckGo Inc.",stat:"100M+ daily searches",blurb:"Popular privacy-first search and browser app."},
+
+    {cat:"Music & Video Streaming",name:"Hulu",pub:"Disney",stat:"50M+ subscribers",blurb:"Popular US streaming service for TV shows and movies."},
+    {cat:"Music & Video Streaming",name:"Max (HBO Max)",pub:"Warner Bros. Discovery",stat:"110M+ subscribers",blurb:"Streaming home for HBO and Warner Bros. content."},
+    {cat:"Music & Video Streaming",name:"Peacock",pub:"NBCUniversal",stat:"36M+ subscribers",blurb:"NBCUniversal's streaming service for TV and live sports."},
+    {cat:"Music & Video Streaming",name:"Paramount+",pub:"Paramount Global",stat:"77M+ subscribers",blurb:"Streaming service for Paramount, CBS and MTV content."},
+
+    {cat:"Utilities & Browsers",name:"WinZip",pub:"WinZip Computing",stat:"1B+ downloads",blurb:"Pioneer of the ZIP file-compression format."},
+    {cat:"Utilities & Browsers",name:"7-Zip",pub:"Igor Pavlov",stat:"500M+ downloads",blurb:"Best-selling free open-source file archiver."},
+    {cat:"Utilities & Browsers",name:"Adobe Acrobat Reader",pub:"Adobe",stat:"700M+ active users",blurb:"World's most-used free PDF reader."},
+    {cat:"Utilities & Browsers",name:"uTorrent",pub:"BitTorrent Inc.",stat:"150M+ users",blurb:"One of the most widely used BitTorrent clients."},
+    {cat:"Utilities & Browsers",name:"BitTorrent",pub:"Rainberry Inc.",stat:"100M+ monthly active users",blurb:"Pioneer peer-to-peer file-sharing protocol and app."},
+    {cat:"Utilities & Browsers",name:"Acronis",pub:"Acronis International",stat:"18,500+ service providers",blurb:"Leading backup and cyber-protection software."},
+
+    {cat:"Gaming",name:"Clash Royale",pub:"Supercell",stat:"600M+ downloads",blurb:"Popular real-time strategy card battler from Supercell."},
+    {cat:"Gaming",name:"Brawl Stars",pub:"Supercell",stat:"700M+ downloads",blurb:"Fast-paced mobile multiplayer battler by Supercell."},
+    {cat:"Gaming",name:"Free Fire",pub:"Garena",stat:"1B+ downloads",blurb:"One of the most-downloaded mobile battle royale games."},
+    {cat:"Gaming",name:"8 Ball Pool",pub:"Miniclip",stat:"500M+ downloads",blurb:"Best-selling mobile pool game worldwide."},
+    {cat:"Gaming",name:"Words With Friends",pub:"Zynga",stat:"200M+ downloads",blurb:"Popular mobile word-game classic."},
+    {cat:"Gaming",name:"Angry Birds",pub:"Rovio Entertainment",stat:"4.5B+ downloads",blurb:"Iconic mobile puzzle game franchise."},
+    {cat:"Gaming",name:"Temple Run",pub:"Imangi Studios",stat:"1B+ downloads",blurb:"Pioneer of the endless-runner mobile game genre."},
+    {cat:"Gaming",name:"Plants vs. Zombies",pub:"PopCap / EA",stat:"500M+ downloads",blurb:"Best-selling tower-defense game franchise."},
+    {cat:"Gaming",name:"League of Legends",pub:"Riot Games",stat:"150M+ monthly active players",blurb:"World's most-played competitive PC game."},
+    {cat:"Gaming",name:"Valorant",pub:"Riot Games",stat:"20M+ monthly active players",blurb:"Leading tactical shooter esports title."},
+    {cat:"Gaming",name:"Apex Legends",pub:"Electronic Arts",stat:"150M+ registered players",blurb:"Popular battle royale shooter franchise."},
+    {cat:"Gaming",name:"Overwatch 2",pub:"Blizzard Entertainment",stat:"35M+ monthly active players",blurb:"Well-known team-based hero shooter."},
+    {cat:"Gaming",name:"EA Sports FC Mobile",pub:"Electronic Arts",stat:"150M+ downloads",blurb:"Leading mobile football/soccer simulation game."},
+    {cat:"Gaming",name:"Mario Kart Tour",pub:"Nintendo",stat:"300M+ downloads",blurb:"Top-grossing mobile entry in the Mario Kart series."},
+    {cat:"Gaming",name:"Honor of Kings",pub:"TiMi Studios / Tencent",stat:"100M+ daily active users",blurb:"World's highest-grossing mobile game, popular in China."},
+    {cat:"Gaming",name:"Coin Master",pub:"Moon Active",stat:"500M+ downloads",blurb:"Best-selling mobile slot and village-building game."},
+    {cat:"Gaming",name:"Homescapes",pub:"Playrix",stat:"500M+ downloads",blurb:"Popular mobile puzzle game with a renovation storyline."},
+    {cat:"Gaming",name:"Township",pub:"Playrix",stat:"180M+ downloads",blurb:"Best-selling mobile farming and city-building game."},
+
+    {cat:"Messaging & Social",name:"Reddit",pub:"Reddit Inc.",stat:"1B+ monthly active users",blurb:"Major online community and discussion-forum platform."},
+    {cat:"Messaging & Social",name:"Tumblr",pub:"Automattic",stat:"135M+ monthly active users",blurb:"Long-running microblogging and social platform."},
+    {cat:"Messaging & Social",name:"Twitch",pub:"Amazon",stat:"140M+ monthly active users",blurb:"World's leading live-streaming platform for gaming."},
+    {cat:"Messaging & Social",name:"BeReal",pub:"BeReal",stat:"40M+ daily active users",blurb:"Popular authentic photo-sharing social app."},
+    {cat:"Messaging & Social",name:"Threads",pub:"Meta",stat:"350M+ monthly active users",blurb:"Meta's text-based social app linked to Instagram."},
+
+    {cat:"Education",name:"Babbel",pub:"Babbel GmbH",stat:"10M+ subscriptions sold",blurb:"Popular paid language-learning app."},
+    {cat:"Education",name:"Rosetta Stone",pub:"IXL Learning",stat:"25M+ users",blurb:"Long-established language-learning software brand."},
+    {cat:"Education",name:"Photomath",pub:"Google",stat:"300M+ downloads",blurb:"Popular app for solving math problems by camera."},
+    {cat:"Education",name:"Chegg",pub:"Chegg Inc.",stat:"6.6M+ subscribers",blurb:"Widely used homework help and study platform."},
+    {cat:"Education",name:"DeepL",pub:"DeepL SE",stat:"40M+ monthly active users",blurb:"Highly rated AI-powered translation service."},
+    {cat:"Education",name:"Google Translate",pub:"Google",stat:"1B+ downloads",blurb:"World's most-used translation app."},
+
+    {cat:"Health & Fitness",name:"Peloton",pub:"Peloton Interactive",stat:"6.7M+ members",blurb:"Leading connected fitness app and equipment brand."},
+    {cat:"Health & Fitness",name:"Noom",pub:"Noom Inc.",stat:"50M+ downloads",blurb:"Popular psychology-based weight-management app."},
+    {cat:"Health & Fitness",name:"Sleep Cycle",pub:"Sleep Cycle AB",stat:"60M+ downloads",blurb:"Best-selling smart alarm and sleep-tracking app."},
+    {cat:"Health & Fitness",name:"Google Fit",pub:"Google",stat:"70M+ downloads",blurb:"Popular fitness and activity tracking app."},
+
+    {cat:"Family & Safety",name:"YouTube Kids",pub:"Google",stat:"35M+ weekly active users",blurb:"Family-friendly video app designed for children."},
+    {cat:"Family & Safety",name:"Qustodio",pub:"Qustodio",stat:"16M+ devices protected",blurb:"Leading parental-control and screen-time app."},
+    {cat:"Family & Safety",name:"Life360",pub:"Life360 Inc.",stat:"80M+ monthly active users",blurb:"Popular family-location sharing and safety app."},
+
+    {cat:"Business & Enterprise",name:"TurboTax",pub:"Intuit",stat:"40M+ e-filers",blurb:"Best-selling tax-preparation software in the US."},
+    {cat:"Creative & Design",name:"Blender",pub:"Blender Foundation",stat:"8M+ users",blurb:"Best-selling free open-source 3D creation suite."}
+  ];
+
+  function parseStat(s){
+    var m=s.match(/([\d,.]+)\s*([BMK]?)\+?/i);
+    if(!m) return 0;
+    var num=parseFloat(m[1].replace(/,/g,""));
+    var suf=(m[2]||"").toUpperCase();
+    if(suf==="B") num*=1e9;
+    else if(suf==="M") num*=1e6;
+    else if(suf==="K") num*=1e3;
+    return num;
+  }
+  // Founding year + HQ country per app/company, plus a generated initials badge
+  // (real trademarked logos can't be bulk-embedded, so this stands in for one).
+  // Best-effort from general knowledge — not individually verified per entry.
+  var ORIGIN={
+    "Microsoft Windows":[1985,"United States"],"Android":[2008,"United States"],"iOS":[2007,"United States"],
+    "Microsoft 365 / Office":[1990,"United States"],"Google Workspace":[2006,"United States"],"Slack":[2013,"United States"],
+    "Adobe Photoshop":[1990,"United States"],"Adobe Creative Cloud":[2012,"United States"],"Canva":[2013,"Australia"],
+    "Norton 360":[2007,"United States"],"McAfee Total Protection":[1987,"United States"],"WhatsApp":[2009,"United States"],
+    "Facebook":[2004,"United States"],"Instagram":[2010,"United States"],"TikTok":[2016,"China"],"WeChat":[2011,"China"],
+    "Minecraft":[2011,"Sweden"],"Grand Theft Auto V":[2013,"United States"],"Fortnite":[2017,"United States"],
+    "PUBG Mobile":[2018,"South Korea"],"Salesforce":[1999,"United States"],"SAP ERP":[1972,"Germany"],
+    "Oracle Database":[1979,"United States"],"Google Chrome":[2008,"United States"],"Zoom":[2011,"United States"],
+    "Spotify":[2008,"Sweden"],"macOS":[2001,"United States"],"Linux (Ubuntu)":[2004,"United Kingdom"],
+    "ChromeOS":[2011,"United States"],"Notion":[2016,"United States"],"Trello":[2011,"United States"],
+    "Asana":[2008,"United States"],"Evernote":[2008,"United States"],"Todoist":[2007,"Portugal"],
+    "Monday.com":[2012,"Israel"],"LibreOffice":[2010,"Germany"],"WPS Office":[1988,"China"],
+    "Figma":[2012,"United States"],"Procreate":[2011,"Australia"],"CapCut":[2020,"China"],
+    "Kaspersky":[1997,"Russia"],"Avast":[1988,"Czech Republic"],"Malwarebytes":[2008,"United States"],
+    "Bitdefender":[2001,"Romania"],"Telegram":[2013,"United Arab Emirates"],"Snapchat":[2011,"United States"],
+    "LinkedIn":[2003,"United States"],"Pinterest":[2010,"United States"],"Discord":[2015,"United States"],
+    "X (Twitter)":[2006,"United States"],"Line":[2011,"Japan"],"Candy Crush Saga":[2012,"United Kingdom"],
+    "Roblox":[2006,"United States"],"Among Us":[2018,"United States"],"Call of Duty: Mobile":[2019,"United States"],
+    "Clash of Clans":[2012,"Finland"],"Genshin Impact":[2020,"China"],"Pokémon GO":[2016,"United States"],
+    "Subway Surfers":[2012,"Denmark"],"Microsoft Dynamics 365":[2016,"United States"],"HubSpot":[2006,"United States"],
+    "Zendesk":[2007,"Denmark"],"Workday":[2005,"United States"],"ServiceNow":[2004,"United States"],
+    "Mozilla Firefox":[2004,"United States"],"Microsoft Edge":[2015,"United States"],"Safari":[2003,"United States"],
+    "Opera":[1995,"Norway"],"WinRAR":[1995,"Germany"],"CCleaner":[2004,"United Kingdom"],
+    "VLC Media Player":[2001,"France"],"PayPal":[1998,"United States"],"Venmo":[2009,"United States"],
+    "Cash App":[2013,"United States"],"Alipay":[2004,"China"],"Paytm":[2010,"India"],"Revolut":[2015,"United Kingdom"],
+    "Google Pay":[2015,"United States"],"Dropbox":[2007,"United States"],"Google Drive":[2012,"United States"],
+    "iCloud":[2011,"United States"],"OneDrive":[2007,"United States"],"Box":[2005,"United States"],
+    "Visual Studio Code":[2015,"United States"],"GitHub":[2008,"United States"],"GitLab":[2011,"Netherlands"],
+    "Postman":[2014,"India"],"Docker":[2013,"United States"],"MyFitnessPal":[2005,"United States"],
+    "Strava":[2009,"United States"],"Headspace":[2010,"United Kingdom"],"Calm":[2012,"United States"],
+    "Duolingo":[2011,"United States"],"Khan Academy":[2008,"United States"],"Coursera":[2012,"United States"],
+    "Udemy":[2010,"United States"],"Netflix":[1997,"United States"],"YouTube":[2005,"United States"],
+    "Amazon Prime Video":[2006,"United States"],"Disney+":[2019,"United States"],"Apple Music":[2015,"United States"],
+    "Uber":[2009,"United States"],"Lyft":[2012,"United States"],"Airbnb":[2008,"United States"],
+    "Booking.com":[1996,"Netherlands"],"Expedia":[1996,"United States"],"Grab":[2012,"Singapore"],
+    "DiDi":[2012,"China"],"Ola":[2010,"India"],"Waze":[2008,"Israel"],"Google Maps":[2005,"United States"],
+    "Trip.com":[1999,"China"],"Skyscanner":[2003,"United Kingdom"],"Tripadvisor":[2000,"United States"],
+    "Careem":[2012,"United Arab Emirates"],"Trivago":[2005,"Germany"],"IRCTC Rail Connect":[1999,"India"],
+    "MakeMyTrip":[2000,"India"],"Klook":[2014,"Hong Kong"],"Agoda":[2005,"Singapore"],
+    "Amazon Shopping":[1994,"United States"],"eBay":[1995,"United States"],"AliExpress":[2010,"China"],
+    "Shopee":[2015,"Singapore"],"Mercado Libre":[1999,"Argentina"],"Etsy":[2005,"United States"],
+    "Walmart":[1962,"United States"],"Flipkart":[2007,"India"],"Wish":[2011,"United States"],
+    "Temu":[2022,"United States"],"Shein":[2008,"Singapore"],"Wayfair":[2002,"United States"],
+    "Rakuten":[1997,"Japan"],"Zalando":[2008,"Germany"],"Yelp":[2004,"United States"],
+    "DoorDash":[2013,"United States"],"Uber Eats":[2014,"United States"],"Deliveroo":[2013,"United Kingdom"],
+    "Zomato":[2008,"India"],"Swiggy":[2014,"India"],"Just Eat":[2001,"Netherlands"],"Grubhub":[2004,"United States"],
+    "Instacart":[2012,"United States"],"Meituan":[2010,"China"],"OpenTable":[1998,"United States"],
+    "Snapseed":[2011,"Germany"],"VSCO":[2011,"United States"],"Adobe Lightroom":[2007,"United States"],
+    "PicsArt":[2011,"Armenia"],"InShot":[2015,"China"],"GarageBand":[2004,"United States"],
+    "FL Studio":[1997,"Belgium"],"OBS Studio":[2012,"United States"],"Google Photos":[2015,"United States"],
+    "Tinder":[2012,"United States"],"Bumble":[2014,"United States"],"Hinge":[2012,"United States"],
+    "OkCupid":[2004,"United States"],"Match.com":[1995,"United States"],"Google News":[2002,"United States"],
+    "The Weather Channel":[1982,"United States"],"AccuWeather":[1962,"United States"],"Flipboard":[2010,"United States"],
+    "ESPN":[1979,"United States"],"ChatGPT":[2022,"United States"],"Microsoft Copilot":[2023,"United States"],
+    "Google Gemini":[2023,"United States"],"Midjourney":[2022,"United States"],"Perplexity AI":[2022,"United States"],
+    "Claude":[2023,"United States"],"DeepSeek":[2023,"China"],"Adobe Firefly":[2023,"United States"],
+    "Google Meet":[2017,"United States"],"Microsoft Teams":[2017,"United States"],"Cisco Webex":[1996,"United States"],
+    "GoToMeeting":[2004,"United States"],"Google Voice":[2009,"United States"],"Google Home":[2016,"United States"],
+    "Amazon Alexa":[2014,"United States"],"Samsung SmartThings":[2014,"South Korea"],"Ring":[2013,"United States"],
+    "LastPass":[2008,"United States"],"1Password":[2005,"Canada"],"Dashlane":[2009,"France"],
+    "Bitwarden":[2016,"United States"],"NordVPN":[2012,"Lithuania"],"ExpressVPN":[2009,"British Virgin Islands"],
+    "Surfshark":[2018,"Netherlands"],"Microsoft Outlook":[1997,"United States"],"Gmail":[2004,"United States"],
+    "Yahoo Mail":[1997,"United States"],"Apple Maps":[2012,"United States"],"Amazon Kindle":[2007,"United States"],
+    "Audible":[1995,"United States"],"Google Play Books":[2010,"United States"],"Coinbase":[2012,"United States"],
+    "Binance":[2017,"Cayman Islands"],"Crypto.com":[2016,"Singapore"],"Chase Mobile":[2009,"United States"],
+    "Robinhood":[2013,"United States"],"Wise":[2011,"United Kingdom"],"Zelle":[2017,"United States"],
+    "eToro":[2007,"Israel"],"Basecamp":[1999,"United States"],"ClickUp":[2017,"United States"],
+    "Airtable":[2012,"United States"],"DocuSign":[2003,"United States"],"Zoho CRM":[1996,"India"],
+    "Pipedrive":[2010,"Estonia"],"QuickBooks":[1983,"United States"],"Xero":[2006,"New Zealand"],
+    "FreshBooks":[2003,"Canada"],"Square":[2009,"United States"],"Shopify":[2006,"Canada"],
+    "CamScanner":[2010,"China"],"Adobe Scan":[2016,"United States"],"Miro":[2011,"Netherlands"],
+    "Loom":[2016,"United States"],"Grammarly":[2009,"United States"],"Atlassian Jira":[2002,"Australia"],
+    "Atlassian Confluence":[2004,"Australia"],"ESET":[1992,"Slovakia"],"Trend Micro":[1988,"Japan"],
+    "TeamViewer":[2005,"Germany"],"AnyDesk":[2014,"Germany"],"Brave":[2015,"United States"],
+    "Tor Browser":[2002,"United States"],"DuckDuckGo":[2008,"United States"],"Hulu":[2007,"United States"],
+    "Max (HBO Max)":[2020,"United States"],"Peacock":[2020,"United States"],"Paramount+":[2021,"United States"],
+    "WinZip":[1991,"United States"],"7-Zip":[1999,"Russia"],"Adobe Acrobat Reader":[1993,"United States"],
+    "uTorrent":[2005,"United States"],"BitTorrent":[2001,"United States"],"Acronis":[2003,"Switzerland"],
+    "Clash Royale":[2016,"Finland"],"Brawl Stars":[2018,"Finland"],"Free Fire":[2017,"Singapore"],
+    "8 Ball Pool":[2013,"Switzerland"],"Words With Friends":[2009,"United States"],"Angry Birds":[2009,"Finland"],
+    "Temple Run":[2011,"United States"],"Plants vs. Zombies":[2009,"United States"],"League of Legends":[2009,"United States"],
+    "Valorant":[2020,"United States"],"Apex Legends":[2019,"United States"],"Overwatch 2":[2022,"United States"],
+    "EA Sports FC Mobile":[2015,"United States"],"Mario Kart Tour":[2019,"Japan"],"Honor of Kings":[2015,"China"],
+    "Coin Master":[2016,"Israel"],"Homescapes":[2017,"Ireland"],"Township":[2013,"Ireland"],
+    "Reddit":[2005,"United States"],"Tumblr":[2007,"United States"],"Twitch":[2011,"United States"],
+    "BeReal":[2020,"France"],"Threads":[2023,"United States"],"Babbel":[2007,"Germany"],
+    "Rosetta Stone":[1992,"United States"],"Photomath":[2014,"Croatia"],"Chegg":[2005,"United States"],
+    "DeepL":[2017,"Germany"],"Google Translate":[2006,"United States"],"Peloton":[2012,"United States"],
+    "Noom":[2008,"United States"],"Sleep Cycle":[2009,"Sweden"],"Google Fit":[2014,"United States"],
+    "YouTube Kids":[2015,"United States"],"Qustodio":[2012,"Spain"],"Life360":[2008,"United States"],
+    "TurboTax":[1984,"United States"],"Blender":[1994,"Netherlands"]
+  };
+  function hashHue(str){
+    var h=0;
+    for(var i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))>>>0; }
+    return h%360;
+  }
+  function getInitials(name){
+    var clean=name.replace(/[().:/+]/g," ").trim();
+    var words=clean.split(/\s+/).filter(function(w){return w&&w!=="&"&&w!=="-";});
+    if(words.length>=2) return (words[0][0]+words[1][0]).toUpperCase();
+    return (words[0]||"").slice(0,2).toUpperCase();
+  }
+  DATA.forEach(function(d){
+    var o=ORIGIN[d.name];
+    d.founded=o?o[0]:null;
+    d.country=o?o[1]:"—";
+    d.initials=getInitials(d.name);
+    d.avatarHue=hashHue(d.name);
+  });
+
+  DATA.sort(function(a,b){return parseStat(b.stat)-parseStat(a.stat);});
+  DATA.forEach(function(d,i){d.globalRank=i+1;});
+
+  var byCat={};
+  DATA.forEach(function(d){(byCat[d.cat]=byCat[d.cat]||[]).push(d);});
+  Object.keys(byCat).forEach(function(c){
+    byCat[c].sort(function(a,b){return parseStat(b.stat)-parseStat(a.stat);});
+    byCat[c].forEach(function(d,i){d.catRank=i+1;});
+  });
+
+  var favorites=new Set();
+  var compareSet=new Set();
+  var expandedSet=new Set();
+  var showFavoritesOnly=false;
+  var sortMode="rank";
+
+  var toastEl=document.getElementById("toast");
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent=msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){toastEl.classList.remove("show");},1800);
+  }
+
+  // Static curated dataset — there's no live backend to pull new numbers from.
+  // "Refresh" re-renders the list in place and confirms freshness, without navigating
+  // (a full page reload isn't safe in every hosting/preview context).
+  var DATA_LAST_UPDATED="August 19, 2026, 9:40 PM UTC";
+  document.getElementById("lastUpdated").textContent="Last updated: "+DATA_LAST_UPDATED;
+  var refreshBtn=document.getElementById("refreshBtn");
+  var refreshIcon=document.getElementById("refreshIcon");
+  refreshBtn.addEventListener("click",function(){
+    refreshBtn.disabled=true;
+    refreshIcon.classList.add("spin");
+    setTimeout(function(){
+      render();
+      refreshIcon.classList.remove("spin");
+      refreshBtn.disabled=false;
+      showToast("Up to date as of "+DATA_LAST_UPDATED);
+    },500);
+  });
+
+  var categories=["All"];
+  DATA.forEach(function(d){if(categories.indexOf(d.cat)===-1)categories.push(d.cat);});
+  var categoryCounts={"All":DATA.length};
+  DATA.forEach(function(d){categoryCounts[d.cat]=(categoryCounts[d.cat]||0)+1;});
+  var activeCat="All";
+  var chipsEl=document.getElementById("chips");
+  var catToggle=document.getElementById("catToggle");
+  var catToggleLabel=document.getElementById("catToggleLabel");
+  catToggleLabel.textContent="All categories ("+categoryCounts["All"]+")";
+  catToggle.addEventListener("click",function(){
+    var isOpen=chipsEl.classList.toggle("open");
+    catToggle.classList.toggle("open",isOpen);
+    catToggle.setAttribute("aria-expanded",isOpen?"true":"false");
+  });
+  document.addEventListener("click",function(e){
+    if(!chipsEl.classList.contains("open")) return;
+    if(chipsEl.contains(e.target)||catToggle.contains(e.target)) return;
+    chipsEl.classList.remove("open");
+    catToggle.classList.remove("open");
+    catToggle.setAttribute("aria-expanded","false");
+  });
+  categories.forEach(function(c){
+    var b=document.createElement("button");
+    b.className="chip"+(c==="All"?" active":"");
+    b.innerHTML=escapeHtml(c)+'<span class="chipcount">('+categoryCounts[c]+')</span>';
+    b.type="button";
+    b.addEventListener("click",function(){
+      activeCat=c;
+      document.querySelectorAll(".chip").forEach(function(el){el.classList.remove("active");});
+      b.classList.add("active");
+      catToggleLabel.textContent=(c==="All"?"All categories":c)+" ("+categoryCounts[c]+")";
+      chipsEl.classList.remove("open");
+      catToggle.classList.remove("open");
+      catToggle.setAttribute("aria-expanded","false");
+      render();
+    });
+    chipsEl.appendChild(b);
+  });
+
+  function escapeHtml(s){
+    var div=document.createElement("div");
+    div.textContent=s;
+    return div.innerHTML;
+  }
+
+  function getFilteredSortedList(){
+    var q=document.getElementById("query").value.trim().toLowerCase();
+    var list=DATA.filter(function(d){
+      var catOk=activeCat==="All"||d.cat===activeCat;
+      var qOk=!q||d.name.toLowerCase().indexOf(q)!==-1||d.pub.toLowerCase().indexOf(q)!==-1;
+      var favOk=!showFavoritesOnly||favorites.has(d.name);
+      return catOk&&qOk&&favOk;
+    });
+    if(sortMode==="name") list.sort(function(a,b){return a.name.localeCompare(b.name);});
+    else if(sortMode==="category") list.sort(function(a,b){return a.cat.localeCompare(b.cat)||(parseStat(b.stat)-parseStat(a.stat));});
+    else list.sort(function(a,b){return parseStat(b.stat)-parseStat(a.stat);});
+    return list;
+  }
+
+  function render(){
+    var list=getFilteredSortedList();
+    var out=document.getElementById("results");
+    document.getElementById("count").textContent=list.length+" of "+DATA.length+" entries";
+    if(!list.length){
+      out.innerHTML='<p class="empty">no matches — try a different name, category or favorites filter.</p>';
+      return;
+    }
+    out.innerHTML=list.map(function(d){
+      var isFav=favorites.has(d.name);
+      var isCmp=compareSet.has(d.name);
+      var isOpen=expandedSet.has(d.name);
+      var foundedText=d.founded?d.founded:"—";
+      return '<div class="card" data-name="'+escapeHtml(d.name)+'"><div class="top"><span class="rank">#'+d.globalRank+' worldwide</span>'+
+        '<span class="cat">'+escapeHtml(d.cat)+'</span></div>'+
+        '<div class="card-head">'+
+          '<div class="avatar" style="background:hsl('+d.avatarHue+',55%,42%)">'+escapeHtml(d.initials)+'</div>'+
+          '<div class="card-titles">'+
+            '<h3 class="name">'+escapeHtml(d.name)+'</h3>'+
+            '<span class="pub">by '+escapeHtml(d.pub)+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<span class="stat">'+escapeHtml(d.stat)+'</span>'+
+        '<p class="blurb">'+escapeHtml(d.blurb)+'</p>'+
+        '<div class="card-actions">'+
+          '<button type="button" class="icon-btn fav-btn'+(isFav?' on':'')+'" data-action="fav">'+(isFav?'★ Saved':'☆ Save')+'</button>'+
+          '<button type="button" class="icon-btn cmp-btn'+(isCmp?' on':'')+'" data-action="cmp">'+(isCmp?'✓ Comparing':'⇄ Compare')+'</button>'+
+          '<button type="button" class="icon-btn detail-btn" data-action="detail">'+(isOpen?'▲ Less':'▼ Details')+'</button>'+
+          '<button type="button" class="icon-btn share-btn" data-action="share">⧉ Copy</button>'+
+        '</div>'+
+        '<div class="detail'+(isOpen?' open':'')+'">#'+d.catRank+' in '+escapeHtml(d.cat)+
+          ' · global #'+d.globalRank+' of '+DATA.length+'<br>publisher: '+escapeHtml(d.pub)+
+          ' · founded: '+foundedText+' · origin: '+escapeHtml(d.country)+'</div>'+
+        '</div>';
+    }).join("");
+  }
+
+  document.getElementById("results").addEventListener("click",function(e){
+    var btn=e.target.closest("button[data-action]");
+    if(!btn) return;
+    var card=btn.closest(".card");
+    var name=card.getAttribute("data-name");
+    var d=DATA.find(function(x){return x.name===name;});
+    if(!d) return;
+    var action=btn.dataset.action;
+    if(action==="fav"){
+      if(favorites.has(name)) favorites.delete(name); else favorites.add(name);
+      render();
+    }else if(action==="cmp"){
+      if(compareSet.has(name)){
+        compareSet.delete(name);
+      }else{
+        if(compareSet.size>=3){ showToast("You can compare up to 3 apps"); return; }
+        compareSet.add(name);
+      }
+      updateCompareBar();
+      render();
+    }else if(action==="detail"){
+      if(expandedSet.has(name)) expandedSet.delete(name); else expandedSet.add(name);
+      render();
+    }else if(action==="share"){
+      var text=d.name+" — "+d.stat+" ("+d.pub+")";
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){showToast("Copied: "+d.name);})
+          .catch(function(){showToast("Could not copy");});
+      }else{
+        showToast("Copy not supported in this browser");
+      }
+    }
+  });
+
+  var compareBar=document.getElementById("compareBar");
+  var compareCountEl=document.getElementById("compareCount");
+  var compareView=document.getElementById("compareView");
+  function updateCompareBar(){
+    compareBar.hidden=compareSet.size===0;
+    compareCountEl.textContent=compareSet.size+" selected";
+  }
+  function renderCompareView(){
+    var items=DATA.filter(function(d){return compareSet.has(d.name);});
+    if(!items.length){ compareView.hidden=true; return; }
+    var rows=[
+      ["Category",function(d){return d.cat;}],
+      ["Publisher",function(d){return d.pub;}],
+      ["Founded",function(d){return d.founded||"—";}],
+      ["Origin",function(d){return d.country;}],
+      ["Figure",function(d){return d.stat;}],
+      ["Global rank",function(d){return "#"+d.globalRank+" of "+DATA.length;}],
+      ["Rank in category",function(d){return "#"+d.catRank;}],
+      ["Description",function(d){return d.blurb;}]
+    ];
+    var html='<button type="button" class="tbtn compare-close" id="compareCloseBtn">✕ Close</button>'+
+      '<h3 style="margin:4px 0 6px;">Compare</h3>'+
+      '<table class="compare-table"><thead><tr><th></th>'+
+      items.map(function(d){return "<th>"+escapeHtml(d.name)+"</th>";}).join("")+
+      '</tr></thead><tbody>'+
+      rows.map(function(r){
+        return "<tr><td><strong>"+r[0]+"</strong></td>"+
+          items.map(function(d){return "<td>"+escapeHtml(String(r[1](d)))+"</td>";}).join("")+"</tr>";
+      }).join("")+
+      '</tbody></table>';
+    compareView.innerHTML=html;
+    compareView.hidden=false;
+    document.getElementById("compareCloseBtn").addEventListener("click",function(){compareView.hidden=true;});
+    compareView.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+  document.getElementById("compareOpen").addEventListener("click",renderCompareView);
+  document.getElementById("compareClear").addEventListener("click",function(){
+    compareSet.clear();
+    compareView.hidden=true;
+    compareView.innerHTML="";
+    updateCompareBar();
+    render();
+  });
+
+  document.getElementById("sortSelect").addEventListener("change",function(e){
+    sortMode=e.target.value;
+    render();
+  });
+
+  var favToggle=document.getElementById("favToggle");
+  favToggle.addEventListener("click",function(){
+    showFavoritesOnly=!showFavoritesOnly;
+    favToggle.classList.toggle("active",showFavoritesOnly);
+    favToggle.textContent=showFavoritesOnly?"★ Favorites":"☆ Favorites";
+    render();
+  });
+
+  function toCSVValue(v){
+    v=String(v==null?"":v);
+    if(/[",\n]/.test(v)) v='"'+v.replace(/"/g,'""')+'"';
+    return v;
+  }
+  function downloadBlob(content,filename,mime){
+    var blob=new Blob([content],{type:mime});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }
+  document.getElementById("exportCsv").addEventListener("click",function(){
+    var list=getFilteredSortedList();
+    var header=["Global Rank","Name","Publisher","Category","Founded","Origin","Figure","Description"];
+    var lines=[header.join(",")];
+    list.forEach(function(d){
+      lines.push([d.globalRank,d.name,d.pub,d.cat,d.founded||"",d.country,d.stat,d.blurb].map(toCSVValue).join(","));
+    });
+    downloadBlob(lines.join("\n"),"rankoo-list.csv","text/csv");
+    showToast("CSV exported ("+list.length+" entries)");
+  });
+  document.getElementById("exportJson").addEventListener("click",function(){
+    var list=getFilteredSortedList().map(function(d){
+      return {rank:d.globalRank,name:d.name,publisher:d.pub,category:d.cat,founded:d.founded,
+        country:d.country,figure:d.stat,description:d.blurb};
+    });
+    downloadBlob(JSON.stringify(list,null,2),"rankoo-list.json","application/json");
+    showToast("JSON exported ("+list.length+" entries)");
+  });
+
+  document.getElementById("query").addEventListener("input",render);
+  updateCompareBar();
+  render();
+})();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("service-worker.js").catch(function(err){
+      console.warn("Service worker registration failed:",err);
+    });
+  });
+}
+</script>
+</body>
+</html>
